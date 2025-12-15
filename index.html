@@ -12,10 +12,10 @@
         /* [디자인 시스템 & 기본 설정] */
         :root {
             --bg-color: #FFFFFF;
-            --main-green: #2E8B57; /* SeaGreen */
-            --soft-green: #90EE90; /* LightGreen */
-            --pastel-gray: #F0F2F0; /* 회백색 배경 */
-            --dark-gray: #666666; /* 부제 텍스트 색상 (가독성 개선) */
+            --main-green: #2E8B57; 
+            --soft-green: #90EE90; 
+            --pastel-gray: #F0F2F0; 
+            --dark-gray: #666666; 
             --highlight-green: #3CB371;
             --btn-gray: #E0E0E0;
             --text-color: #000000;
@@ -70,7 +70,7 @@
         }
 
         /* ----------------------- */
-        /* 단계 1: 초기 화면 */
+        /* 단계 1 & 2 */
         /* ----------------------- */
         #intro-area {
             display: flex;
@@ -80,69 +80,60 @@
             height: 100%;
             width: 100%;
             transition: all 0.5s ease-in-out;
+            /* 🚨🚨🚨 [수정된 부분] 전체 영역을 살짝 아래로 내려 시각적 중앙 확보 🚨🚨🚨 */
+            padding-top: 100px; 
+            box-sizing: border-box; /* padding이 전체 높이에 포함되도록 */
         }
 
-        /* ----------------------- */
-        /* 단계 2: 부제 텍스트 */
-        /* ----------------------- */
         #subtitle {
-            margin-top: 60px; /* 로고와의 간격 */
+            margin-top: 40px; 
             font-size: 2.2rem; 
             font-weight: bold;
             color: var(--dark-gray); 
-            /* 애니메이션 시작 상태 */
             opacity: 0;
             transform: translateY(30px); 
             transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
         
-        /* 부제 등장 애니메이션 상태 */
         #intro-area.step-2 #subtitle {
             opacity: 1;
             transform: translateY(0);
         }
 
-        /* 단계 2에서 로고 위치 조정 (살짝 위로) */
         #intro-area.step-2 .logo-box {
-            transform: translateY(-50px); /* 로고와 부제 사이 간격 확보 */
+            transform: translateY(-50px); 
         }
 
 
         /* ----------------------- */
-        /* 단계 3: 버튼 그룹 */
+        /* 단계 3: 버튼 그룹 및 최종 배치 */
         /* ----------------------- */
 
-        /* 두 버튼을 감싸는 컨테이너 */
         #selection-buttons {
             display: flex;
-            gap: 40px; 
-            margin-top: 100px; /* 부제와 버튼 그룹 사이 간격 */
+            gap: 60px; /* 간격 더 넓힘 (40px -> 60px) */
+            margin-top: 80px; /* 부제와 버튼 그룹 사이 간격 더 넓힘 (50px -> 80px) */
             opacity: 0;
             transform: translateY(30px);
             transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             z-index: 10;
         }
 
-        /* 🚨🚨🚨 [수정된 부분] 단계 3: 최종 배치 🚨🚨🚨 */
-
-        /* 단계 3: 로고, 부제, 버튼이 함께 화면 중앙에 배치되도록 transform을 초기화 */
+        /* 단계 3: 최종 배치에서는 transform 초기화 상태를 유지하여 중앙 배치 */
         #intro-area.step-3 .logo-box,
         #intro-area.step-3 #subtitle,
         #intro-area.step-3 #selection-buttons {
             transform: translateY(0px); 
-            /* transform을 0으로 설정하여 모든 요소를 #intro-area (화면 중앙)의 중심으로 배치 */
-            /* #intro-area.step-3 .logo-box { transform: translateY(0px); } */
         }
 
-        /* 버튼 그룹 등장 */
         #intro-area.step-3 #selection-buttons {
             opacity: 1;
         }
         
         .selection-btn {
-            padding: 25px 60px; 
+            padding: 30px 70px; /* 버튼 크기 더 확대 */
             border-radius: 20px;
-            font-size: 1.8rem; 
+            font-size: 2.0rem; /* 폰트 크기 더 확대 */
             font-weight: bold;
             background-color: var(--btn-gray);
             color: var(--text-color);
@@ -158,8 +149,6 @@
 
         #intro-area.step-3 {
             cursor: default;
-            /* Flexbox는 이미 justify-content: center로 설정되어 있어 
-               모든 요소가 세로축 중앙에 정렬됩니다. */
         }
 
         /* ========================================================= */
@@ -738,4 +727,3 @@
 </script>
 </body>
 </html>
-
