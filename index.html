@@ -64,13 +64,13 @@
             font-size: 2.5rem; 
             font-weight: bold;
             box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-            cursor: default;
+            cursor: pointer; /* 클릭/터치 가능하도록 변경 */
             transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
             z-index: 10;
         }
 
         /* ----------------------- */
-        /* 단계 1 & 2 */
+        /* 단계 1, 2, 3 전체 컨테이너 */
         /* ----------------------- */
         #intro-area {
             display: flex;
@@ -80,11 +80,14 @@
             height: 100%;
             width: 100%;
             transition: all 0.5s ease-in-out;
-            /* 🚨🚨🚨 [수정된 부분] 전체 영역을 살짝 아래로 내려 시각적 중앙 확보 🚨🚨🚨 */
-            padding-top: 100px; 
-            box-sizing: border-box; /* padding이 전체 높이에 포함되도록 */
+            /* 🚨🚨🚨 [수정된 부분] 전체 영역을 상단으로 약간 이동 (100px -> 50px) 🚨🚨🚨 */
+            padding-top: 50px; 
+            box-sizing: border-box; 
         }
 
+        /* ----------------------- */
+        /* 단계 2: 부제 등장 및 로고 이동 */
+        /* ----------------------- */
         #subtitle {
             margin-top: 40px; 
             font-size: 2.2rem; 
@@ -101,39 +104,46 @@
         }
 
         #intro-area.step-2 .logo-box {
+            /* 단계 2에서는 로고를 위로 이동 */
             transform: translateY(-50px); 
         }
 
 
         /* ----------------------- */
-        /* 단계 3: 버튼 그룹 및 최종 배치 */
+        /* 단계 3: 최종 배치 */
         /* ----------------------- */
 
         #selection-buttons {
             display: flex;
-            gap: 60px; /* 간격 더 넓힘 (40px -> 60px) */
-            margin-top: 80px; /* 부제와 버튼 그룹 사이 간격 더 넓힘 (50px -> 80px) */
+            gap: 60px; 
+            margin-top: 80px; 
             opacity: 0;
             transform: translateY(30px);
             transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             z-index: 10;
         }
 
-        /* 단계 3: 최종 배치에서는 transform 초기화 상태를 유지하여 중앙 배치 */
-        #intro-area.step-3 .logo-box,
-        #intro-area.step-3 #subtitle,
-        #intro-area.step-3 #selection-buttons {
+        /* 🚨🚨🚨 [수정된 부분] 단계 3: 로고는 이동하지 않고, 부제와 버튼만 최종 위치로 이동 🚨🚨🚨 */
+        #intro-area.step-3 .logo-box {
+            /* 로고는 최종 단계에서 원래 위치(중앙)로 복귀 */
+            transform: translateY(0px); 
+        }
+
+        #intro-area.step-3 #subtitle {
+            /* 부제는 중앙으로 이동시키지 않고, 로고 아래 고정 */
             transform: translateY(0px); 
         }
 
         #intro-area.step-3 #selection-buttons {
             opacity: 1;
+            /* 버튼 그룹도 중앙에 고정 */
+            transform: translateY(0px); 
         }
         
         .selection-btn {
-            padding: 30px 70px; /* 버튼 크기 더 확대 */
+            padding: 30px 70px; 
             border-radius: 20px;
-            font-size: 2.0rem; /* 폰트 크기 더 확대 */
+            font-size: 2.0rem; 
             font-weight: bold;
             background-color: var(--btn-gray);
             color: var(--text-color);
@@ -152,7 +162,7 @@
         }
 
         /* ========================================================= */
-        /* [2. Main 화면 스타일 (기존 업로드 화면)] - 기존 코드 유지 */
+        /* [2. Main 화면 스타일 (기존 업로드 화면)] */
         /* ========================================================= */
 
         #main-content-area {
@@ -183,7 +193,8 @@
             left: 0;
             z-index: 10;
         }
-
+        
+        /* 이하 기존 CSS 유지 */
         .upload-zone {
             width: 60%;
             height: 50%;
@@ -351,7 +362,7 @@
 
     <div id="app-container">
         <div id="intro-area">
-            <div class="logo-box">어떻게? 🚮</div>
+            <div class="logo-box" id="intro-logo-box" onclick="resetApp()">어떻게? 🚮</div>
             <div id="subtitle" class="bold">분리수거를 보다 더 쉽게.</div>
             
             <div id="selection-buttons">
@@ -456,8 +467,11 @@
     setupActionListener();
 
     function setupActionListener() {
-        appContainer.addEventListener('click', handleUserAction);
-        appContainer.addEventListener('touchstart', handleUserAction);
+        // Step 3에서는 버튼만 클릭 가능해야 하므로, Step 1, 2에서만 전체 영역 이벤트 리스너 활성화
+        if (currentStep < 3) {
+            appContainer.addEventListener('click', handleUserAction);
+            appContainer.addEventListener('touchstart', handleUserAction);
+        }
     }
 
     function disableActionListener() {
@@ -467,7 +481,18 @@
 
 
     function handleUserAction(event) {
-        if (currentStep === 3 && event.target.closest('#selection-buttons')) {
+        // 로고 박스 클릭은 리셋 기능이므로 무시하지 않음
+        if (event.target.closest('#intro-logo-box')) {
+             return; 
+        }
+        
+        // 버튼 영역에서 발생한 이벤트는 무시
+        if (event.target.closest('#selection-buttons')) {
+            return;
+        }
+        
+        // 3단계에서는 배경 터치/클릭 무시
+        if (currentStep === 3) {
             return;
         }
 
@@ -490,6 +515,7 @@
         } else if (currentStep === 2) {
             introArea.classList.add('step-3');
             currentStep = 3;
+            // 3단계에서는 배경 액션을 멈추고 버튼만 활성화
             disableActionListener(); 
         }
     }
@@ -511,7 +537,7 @@
 
 
     // ---------------------------------------------------------
-    // [B. 기존 Main 화면 로직 (유지)]
+    // [B. Main 화면 및 리셋 로직]
     // ---------------------------------------------------------
 
     async function initAI() {
@@ -702,14 +728,17 @@
             loadingInterval = null;
         }
 
+        // 모든 메인 화면 요소 숨김
         mainContentArea.style.display = 'none';
         mainContentArea.style.opacity = 0;
         mainHeader.style.display = 'none';
 
+        // Intro 화면 초기화
         introArea.style.display = 'flex';
         introArea.classList.remove('step-2', 'step-3');
         currentStep = 1;
         
+        // Main 화면 상태 초기화
         uploadZone.style.display = 'flex';
         fileInput.value = ''; 
         previewImg.style.display = 'none';
@@ -722,6 +751,7 @@
         instructionBtn.classList.remove('active');
         videoBtn.classList.remove('active');
         
+        // 이벤트 리스너 재설정
         setupActionListener();
     }
 </script>
