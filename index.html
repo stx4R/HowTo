@@ -279,158 +279,185 @@
         </div>
     </div>
 
-    <script>
-        // [변수 선언]
-        const uploadZone = document.getElementById('upload-zone');
-        const fileInput = document.getElementById('file-input');
-        const previewImg = document.getElementById('preview-img');
-        const statusText = document.getElementById('status-text');
-        const btnGroup = document.getElementById('btn-group');
-        const detailView = document.getElementById('detail-view');
-        const resetBar = document.getElementById('reset-bar');
+<script>
+    // =========================================================
+    // [1. 티처블 머신 모델 URL 설정]
+    // 당신의 Teachable Machine 모델 URL로 반드시 변경하세요!
+    const URL = "https://teachablemachine.withgoogle.com/models/여기에_당신의_주소를_넣으세요/"; 
+    // =========================================================
 
-        // 1. 업로드 트리거
-        function triggerUpload() {
-            fileInput.click();
+    let model, maxPredictions;
+
+    // 1-1. AI 모델 초기화 (앱 시작 시 한번 실행)
+    async function initAI() {
+        const modelURL = URL + "model.json";
+        const metadataURL = URL + "metadata.json";
+
+        try {
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+            console.log("AI 모델 로딩 완료!");
+        } catch (e) {
+            console.error("모델 로딩 실패. URL을 확인하거나 CORS 설정 문제일 수 있습니다.", e);
+        }
+    }
+    
+    // 페이지 로드 시 AI 준비 시작
+    window.onload = initAI;
+
+    // [2. DOM 엘리먼트 및 상태 변수]
+    const uploadZone = document.getElementById('upload-zone');
+    const fileInput = document.getElementById('file-input');
+    const previewImg = document.getElementById('preview-img');
+    const statusText = document.getElementById('status-text');
+    const btnGroup = document.getElementById('btn-group');
+    const detailView = document.getElementById('detail-view');
+    const resetBar = document.getElementById('reset-bar');
+
+    let detectedCategory = ""; 
+    let detectedSpecific = ""; 
+
+    function triggerUpload() { fileInput.click(); }
+
+    function handleFileSelect(input) {
+        if (!model) {
+            alert("AI 모델 로딩 중입니다. 잠시 후 다시 시도해주세요.");
+            return;
         }
 
-        // 2. 파일 선택 시 로직 시작
-        function handleFileSelect(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    // 화면 전환: 업로드 박스 숨기고 미리보기 및 텍스트 표시
-                    uploadZone.style.display = 'none';
-                    previewImg.src = e.target.result;
-                    previewImg.style.display = 'block';
-                    statusText.style.display = 'block';
-                    
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadZone.style.display = 'none';
+                previewImg.src = e.target.result;
+                previewImg.style.display = 'block';
+                statusText.style.display = 'block';
+                
+                // 이미지가 로딩된 후에 AI 예측 시작
+                previewImg.onload = function() {
                     startDetectionProcess();
-                };
-                reader.readAsDataURL(input.files[0]);
+                }
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // 3. AI 감지 로직 (로딩 애니메이션 + 실제 예측)
+    async function startDetectionProcess() {
+        
+        // 3-1. 로딩 애니메이션 시작
+        let dots = 0;
+        const loadingInterval = setInterval(() => {
+            dots = (dots % 3) + 1;
+            statusText.innerHTML = `감지중 ${".".repeat(dots)}`;
+        }, 300);
+
+        // 3-2. AI 예측 수행 (predict)
+        // 예측이 완료될 때까지 기다립니다.
+        const prediction = await model.predict(previewImg);
+        
+        // 3-3. 가장 높은 확률의 쓰레기 찾기 및 분석
+        let highestProbability = 0;
+        let bestClass = "";
+
+        for (let i = 0; i < maxPredictions; i++) {
+            if (prediction[i].probability > highestProbability) {
+                highestProbability = prediction[i].probability;
+                bestClass = prediction[i].className;
             }
         }
 
-        // 3. AI 감지 애니메이션 및 로직 (핵심)
-        function startDetectionProcess() {
-            let dots = 0;
-            let loopCount = 0;
-            
-            // "감지중 ." 애니메이션 (0.3초 간격)
-            const interval = setInterval(() => {
-                dots = (dots % 3) + 1;
-                let dotText = ".".repeat(dots);
-                statusText.innerHTML = `감지중 ${dotText}`;
-                loopCount++;
+        // 로딩 애니메이션 종료
+        clearInterval(loadingInterval);
 
-                // 약 3초(10번 루프) 후 1차 감지 완료 가정
-                if (loopCount > 10) {
-                    clearInterval(interval);
-                    showFirstDetection();
-                }
-            }, 300);
+        // 클래스 이름 분석 (예: "플라스틱_빈 페트병")
+        const splitName = bestClass.split('_');
+        
+        if (splitName.length >= 2) {
+            detectedCategory = splitName[0]; 
+            detectedSpecific = splitName[1]; 
+        } else {
+            // 언더바가 없을 경우 대비
+            detectedCategory = "일반쓰레기";
+            detectedSpecific = bestClass;
         }
+        
+        // 3-4. 단계별 결과 표시 시작
+        showFirstDetection();
+    }
 
-        function showFirstDetection() {
-            // 1차 감지: 플라스틱
-            statusText.innerHTML = `아하 !<br>이 쓰레기는 <span class="highlight-text">플라스틱</span>이군요!`;
-            
-            // 2초 뒤 2차 감지 시작
-            setTimeout(() => {
-                showSecondDetection();
-            }, 2000);
-        }
+    // 4. 감지 결과 표시 함수들 (이전과 동일)
 
-        function showSecondDetection() {
-            // 2차 감지: 페트병 (구체적)
-            statusText.innerHTML = `아하 !<br>이 쓰레기는 <span class="highlight-text">페트병</span>이군요!`;
-            
-            // 2초 뒤 완료 화면
-            setTimeout(() => {
-                showComplete();
-            }, 2000);
-        }
+    function showFirstDetection() {
+        // 1차 감지 결과 출력 (카테고리)
+        statusText.innerHTML = `아하 !<br>이 쓰레기는 <span class="highlight-text">${detectedCategory}</span>이군요!`;
+        
+        setTimeout(() => {
+            showSecondDetection();
+        }, 2000);
+    }
 
-        function showComplete() {
-            // 텍스트 사라지고 완료 메시지
-            previewImg.style.display = 'none'; // 사진도 숨김 (요청사항: 텍스트 박스만 남기기 위해 공간 확보)
-            /* *참고: 사진을 계속 보여주고 싶으면 위 줄을 삭제하세요. 
-               요청하신 "모든 텍스트가 사라지고 완료 텍스트가 나온다"에 맞춤.
-            */
-            statusText.innerHTML = `감지 완료 ! 🌿`;
-            statusText.style.color = "var(--main-green)"; // 완료 느낌
-            
-            // 버튼 그룹 표시
-            btnGroup.style.display = 'flex';
-        }
+    function showSecondDetection() {
+        // 2차 감지 결과 출력 (구체적 이름)
+        statusText.innerHTML = `아하 !<br>이 쓰레기는 <span class="highlight-text">${detectedSpecific}</span>이군요!`;
+        
+        setTimeout(() => {
+            showComplete();
+        }, 2000);
+    }
 
-        // 4. 분리수거 방법 클릭 시
-        function showInstruction() {
-            statusText.style.display = 'none'; // 상단 텍스트 숨김
-            btnGroup.style.display = 'none';   // 버튼 숨김
-            
-            detailView.style.display = 'flex';
-            
-            // 4단계 이미지와 텍스트 생성
-            detailView.innerHTML = `
-                <h2 style="color:var(--main-green); margin-bottom:30px;">분리수거 방법 (페트병)</h2>
-                <div class="step-container">
-                    <div class="step-box">
-                        <div class="step-img">사진 1</div>
-                        <div>내용물을 깨끗이 비웁니다.</div>
-                    </div>
-                    <div class="step-box">
-                        <div class="step-img">사진 2</div>
-                        <div>라벨(비닐)을 제거합니다.</div>
-                    </div>
-                    <div class="step-box">
-                        <div class="step-img">사진 3</div>
-                        <div>최대한 압축하여 찌그러뜨립니다.</div>
-                    </div>
-                    <div class="step-box">
-                        <div class="step-img">사진 4</div>
-                        <div>뚜껑을 닫아 배출합니다.</div>
-                    </div>
-                </div>
-            `;
+    function showComplete() {
+        previewImg.style.display = 'none'; 
+        statusText.innerHTML = `감지 완료 ! 🌿`;
+        statusText.style.color = "var(--main-green)"; 
+        btnGroup.style.display = 'flex';
+    }
 
-            // 하단 '또다시' 버튼 등장
-            resetBar.style.display = 'flex';
-        }
+    // 5. 상세 정보 표시 함수들 (이전과 동일)
 
-        // 5. 분리수거 영상 클릭 시
-        function showVideo() {
-            statusText.style.display = 'none';
-            btnGroup.style.display = 'none';
-            
-            detailView.style.display = 'flex';
-            
-            // 영상 플레이스홀더 (실제 개발시 <video> 태그 사용)
-            detailView.innerHTML = `
-                <div class="video-box">
-                    ▶️ 분리수거 시범 영상 재생 중...
-                </div>
-            `;
+    function showInstruction() {
+        statusText.style.display = 'none'; 
+        btnGroup.style.display = 'none';   
+        detailView.style.display = 'flex';
+        
+        // detectedSpecific 값에 따른 분리수거 방법 안내
+        detailView.innerHTML = `
+            <h2 style="color:var(--main-green); margin-bottom:30px;">분리수거 방법 (${detectedSpecific})</h2>
+            <div class="step-container">
+                <div class="step-box"><div class="step-img">사진 1</div><div>내용물 비우기</div></div>
+                <div class="step-box"><div class="step-img">사진 2</div><div>이물질 제거</div></div>
+                <div class="step-box"><div class="step-img">사진 3</div><div>찌그러뜨리기</div></div>
+                <div class="step-box"><div class="step-img">사진 4</div><div>뚜껑 닫기</div></div>
+            </div>
+        `;
+        resetBar.style.display = 'flex';
+    }
 
-            // 하단 '또다시' 버튼 등장
-            resetBar.style.display = 'flex';
-        }
+    function showVideo() {
+        statusText.style.display = 'none';
+        btnGroup.style.display = 'none';
+        detailView.style.display = 'flex';
+        detailView.innerHTML = `<div class="video-box">▶️ ${detectedSpecific} 분리수거 영상 재생 중...</div>`;
+        resetBar.style.display = 'flex';
+    }
 
-        // 6. 초기화 (또다시 or 로고 클릭)
-        function resetApp() {
-            // 모든 상태 초기화
-            uploadZone.style.display = 'flex';
-            fileInput.value = ''; // 파일 입력 초기화
-            previewImg.style.display = 'none';
-            statusText.style.display = 'none';
-            statusText.style.color = '#888';
-            btnGroup.style.display = 'none';
-            detailView.style.display = 'none';
-            resetBar.style.display = 'none';
-            
-            // 애니메이션 초기화를 위해 내용 비움
-            statusText.innerHTML = '';
-        }
-    </script>
+    // 6. 초기화 함수 (이전과 동일)
+
+    function resetApp() {
+        uploadZone.style.display = 'flex';
+        fileInput.value = ''; 
+        previewImg.style.display = 'none';
+        statusText.style.display = 'none';
+        statusText.style.color = '#888';
+        btnGroup.style.display = 'none';
+        detailView.style.display = 'none';
+        resetBar.style.display = 'none';
+        statusText.innerHTML = '';
+        
+        detectedCategory = "";
+        detectedSpecific = "";
+    }
+</script>
 </body>
 </html>
+
