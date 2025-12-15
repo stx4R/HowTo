@@ -4,7 +4,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="어떻게?">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3299/3299954.png"> ```
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3299/3299954.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>어떻게? 🚮 - 분리수거 가이드</title>
@@ -304,6 +304,7 @@
                 return;
             }
             
+            model = await tmImage.load(modelURL, metadataURL);await tf.ready();
             model = await tmImage.load(modelURL, metadataURL);
             maxPredictions = model.getTotalClasses();
             console.log("AI 모델 로딩 완료! 클래스 수:", maxPredictions);
@@ -490,6 +491,7 @@
 </script>
 </body>
 </html>
+
 
 
 
