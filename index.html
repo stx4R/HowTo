@@ -28,7 +28,9 @@
             height: 100%;
             font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
             background-color: var(--bg-color);
-            overflow: hidden;
+            /* 모바일 환경에서 스크롤 방지 및 뷰포트 고정 */
+            overflow: hidden; 
+            touch-action: manipulation; 
             display: flex;
             justify-content: center;
             align-items: center;
@@ -47,6 +49,8 @@
             align-items: center;
             justify-content: center;
             transition: all 0.5s ease-in-out;
+            /* 터치 영역 전체를 활성화 */
+            cursor: pointer; 
         }
 
         /* ========================================================= */
@@ -56,14 +60,14 @@
         /* 로고 텍스트 박스 */
         .logo-box {
             background: linear-gradient(135deg, var(--soft-green), var(--main-green));
-            padding: 20px 40px; /* 크기 확대 */
+            padding: 20px 40px; 
             border-radius: 25px;
             color: white;
-            font-size: 2.5rem; /* 크기 확대 */
+            font-size: 2.5rem; 
             font-weight: bold;
             box-shadow: 0 5px 15px rgba(0,0,0,0.15);
             cursor: default;
-            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* 부드러운 애니메이션 곡선 */
+            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
             z-index: 10;
         }
 
@@ -84,13 +88,13 @@
         /* 단계 2: 부제 텍스트 */
         /* ----------------------- */
         #subtitle {
-            margin-top: 40px; /* 간격 확대 (기존 20px -> 40px) */
-            font-size: 2.2rem; /* 크기 확대 */
+            margin-top: 40px; /* 로고와의 간격 */
+            font-size: 2.2rem; 
             font-weight: bold;
-            color: var(--dark-gray); /* 색상 진하게 변경 */
+            color: var(--dark-gray); /* 짙은 회색 */
             /* 애니메이션 시작 상태 */
             opacity: 0;
-            transform: translateY(30px); /* 시작 위치를 더 아래로 */
+            transform: translateY(30px);
             transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
         
@@ -102,7 +106,7 @@
 
         /* 단계 2에서 로고 위치 조정 (살짝 위로) */
         #intro-area.step-2 .logo-box {
-            transform: translateY(-50px); /* 간격 확보를 위해 로고를 더 위로 이동 (기존 -20px -> -50px) */
+            transform: translateY(-50px); 
         }
 
 
@@ -113,49 +117,52 @@
         /* 두 버튼을 감싸는 컨테이너 */
         #selection-buttons {
             display: flex;
-            gap: 40px; /* 버튼 간격 확대 */
-            margin-top: 50px; /* 부제와 버튼 그룹 사이 간격 (유지/조정) */
+            gap: 40px; 
+            margin-top: 50px; /* 부제와 버튼 그룹 사이 간격 */
             opacity: 0;
             transform: translateY(30px);
             transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 10; /* 버튼이 터치되도록 z-index 확보 */
         }
 
         /* 단계 3에서 버튼 그룹 등장 */
         #intro-area.step-3 #selection-buttons {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(-100px); /* 전체 그룹과 동일하게 상단 이동 */
         }
 
         /* 단계 3에서 로고 및 부제 위치 조정 (정중앙 고른 분포) */
-        /* 로고, 부제, 버튼 그룹 전체의 중심을 맞추기 위해 Y축 이동량 재조정 */
+        /* 모든 요소가 상단으로 함께 이동하며 중앙에 고르게 분포 */
         #intro-area.step-3 .logo-box {
-            transform: translateY(-100px); /* 이동량 조정 (단계 2와 단계 3의 간격 차이 조정) */
-        }
-        #intro-area.step-3 #subtitle {
-            margin-top: 40px; /* 간격 유지 */
             transform: translateY(-100px);
         }
-        /* 버튼 그룹의 최종 위치는 CSS 기본 위치에서 위로 100px 이동 (로고/부제와 동일하게) */
-        #intro-area.step-3 #selection-buttons {
-            transform: translateY(-100px); 
+        #intro-area.step-3 #subtitle {
+            margin-top: 40px;
+            transform: translateY(-100px);
         }
         
         .selection-btn {
-            padding: 25px 60px; /* 크기 확대 */
+            padding: 25px 60px; 
             border-radius: 20px;
-            font-size: 1.8rem; /* 크기 확대 */
+            font-size: 1.8rem; 
             font-weight: bold;
             background-color: var(--btn-gray);
             color: var(--text-color);
             box-shadow: 0 5px 10px rgba(0,0,0,0.1);
             cursor: pointer;
             transition: transform 0.2s, background-color 0.2s;
+            /* 단계 3에서 버튼만 독립적으로 터치/클릭 가능 */
+            pointer-events: auto; 
         }
 
         .selection-btn:active {
             transform: scale(0.95);
         }
 
+        /* 단계 3에서는 전체 영역의 클릭을 막고 버튼만 활성화 */
+        #intro-area.step-3 {
+            cursor: default;
+        }
 
         /* ========================================================= */
         /* [2. Main 화면 스타일 (기존 업로드 화면)] - 기존 코드 유지 */
@@ -438,10 +445,7 @@
     // [2. DOM 엘리먼트 및 상태 변수]
     const appContainer = document.getElementById('app-container');
     const introArea = document.getElementById('intro-area');
-    const introLogo = introArea.querySelector('.logo-box');
-    const introSubtitle = document.getElementById('subtitle');
-    const selectionButtons = document.getElementById('selection-buttons');
-    const btnStart = document.getElementById('btn-start'); // 메인 화면 진입 버튼
+    const btnStart = document.getElementById('btn-start'); 
     const mainContentArea = document.getElementById('main-content-area');
     const mainHeader = document.getElementById('app-header');
 
@@ -466,31 +470,60 @@
     let currentGuide = null; 
 
     // ---------------------------------------------------------
-    // [A. Intro 애니메이션 로직]
+    // [A. Intro 애니메이션 로직 - 터치 환경 최적화]
     // ---------------------------------------------------------
 
     // 1-1. 초기화 시 모델 로딩 시작
     window.onload = initAI; 
 
-    // 1-2. 사용자 동작 감지 및 단계 전환
-    appContainer.addEventListener('click', handleUserAction);
+    // 초기 이벤트 리스너 설정
+    setupActionListener();
 
-    function handleUserAction() {
+    function setupActionListener() {
+        // 데스크톱 클릭과 모바일 터치(터치 시작) 이벤트 모두 처리
+        appContainer.addEventListener('click', handleUserAction);
+        appContainer.addEventListener('touchstart', handleUserAction);
+    }
+
+    function disableActionListener() {
+        // 이벤트 리스너 제거
+        appContainer.removeEventListener('click', handleUserAction);
+        appContainer.removeEventListener('touchstart', handleUserAction);
+    }
+
+
+    function handleUserAction(event) {
+        // 이벤트가 최종 버튼 그룹 내에서 발생한 경우 무시 (버튼 고유 기능 활성화)
+        if (currentStep === 3 && event.target.closest('#selection-buttons')) {
+            return;
+        }
+
+        // 터치 이벤트의 경우, 기본 동작(스크롤, 확대 등) 방지
+        if (event.type === 'touchstart') {
+            event.preventDefault(); 
+        }
+        
+        // 터치 디바이스에서 touchstart 후 click 이벤트가 중복 발생하는 것을 방지
+        if (event.type === 'click' && event.touches && event.touches.length > 0) {
+            return; 
+        }
+
         if (currentStep === 1) {
             // 단계 1 -> 단계 2 전환
             introArea.classList.add('step-2');
-            introArea.classList.remove('step-3');
             currentStep = 2;
-            appContainer.removeEventListener('click', handleUserAction);
+            // 다음 단계로 넘어가기 위한 이벤트 리스너 재설정 (디바운싱)
+            disableActionListener();
             setTimeout(() => {
-                 appContainer.addEventListener('click', handleUserAction);
-            }, 600); // 애니메이션 시간 고려
+                setupActionListener();
+            }, 700); 
             
         } else if (currentStep === 2) {
             // 단계 2 -> 단계 3 전환
             introArea.classList.add('step-3');
             currentStep = 3;
-            appContainer.removeEventListener('click', handleUserAction); // 클릭으로 메인 진입 방지
+            // 최종 단계에 도달했으므로 배경 터치 이벤트 영구 비활성화
+            disableActionListener(); 
         }
     }
 
@@ -505,12 +538,11 @@
         
         // Main 화면 표시
         mainContentArea.style.display = 'flex';
-        mainHeader.style.display = 'flex'; // 메인 화면 헤더 표시
+        mainHeader.style.display = 'flex'; 
         
-        // 부드러운 전환 효과
         setTimeout(() => {
             mainContentArea.style.opacity = 1;
-        }, 10); // 약간의 딜레이 후 투명도 변경
+        }, 10); 
     }
 
 
@@ -726,8 +758,8 @@
         instructionBtn.classList.remove('active');
         videoBtn.classList.remove('active');
         
-        appContainer.removeEventListener('click', handleUserAction);
-        appContainer.addEventListener('click', handleUserAction);
+        // 초기화 후 이벤트 리스너 재설정
+        setupActionListener();
     }
 </script>
 </body>
