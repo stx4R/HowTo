@@ -52,12 +52,20 @@
             height: 100px;
             display: flex;
             align-items: center;
-            padding-left: 50px;
-            box-sizing: border-box;
+            justify-content: center; /* 초기: 중앙 정렬 */
+            padding: 0;
             position: absolute;
             top: 0;
             left: 0;
             z-index: 10;
+            /* 로고 이동 애니메이션을 위한 트랜지션 추가 */
+            transition: all 0.5s ease-in-out; 
+        }
+
+        /* 로고가 왼쪽으로 이동했을 때의 상태 */
+        header.logo-moved {
+            justify-content: flex-start; /* 왼쪽 정렬 */
+            padding-left: 50px; /* 왼쪽 패딩 추가 */
         }
 
         .logo-box {
@@ -136,7 +144,9 @@
         .button-group {
             display: none; /* 초기엔 숨김 */
             margin-top: 50px;
+            margin-bottom: 20px; /* 상세 뷰와 간격 확보 */
             gap: 40px;
+            z-index: 5; /* 상세 뷰 위에 보이도록 */
         }
 
         .action-btn {
@@ -150,10 +160,16 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
             transition: transform 0.1s, background-color 0.2s;
         }
+        
+        /* 활성화된 버튼 스타일 */
+        .action-btn.active {
+            background-color: var(--main-green); /* 활성화 시 진한 초록 */
+            color: white;
+            box-shadow: 0 5px 15px rgba(46, 139, 87, 0.4);
+        }
 
-        .action-btn:active, .action-btn.active-clicked {
+        .action-btn:active {
             transform: scale(0.95);
-            background-color: #D3D3D3; /* 클릭 티내기 */
         }
 
         /* 4. 상세 컨텐츠 (방법/영상) */
@@ -164,44 +180,75 @@
             display: none;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
+            padding-top: 30px; 
+            box-sizing: border-box;
+            overflow-y: auto;
         }
-
-        .step-container {
-            display: flex;
-            justify-content: space-around;
-            width: 100%;
+        
+        /* 4-1. 2x2 격자 컨테이너 스타일 */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2열 */
+            grid-template-rows: repeat(2, 1fr); /* 2행 */
+            gap: 30px; /* 격자 사이 간격 */
+            width: 90%;
+            max-width: 1200px;
+            margin: 30px auto;
         }
 
         .step-box {
-            width: 22%;
             background-color: #f9f9f9;
-            padding: 15px;
+            padding: 20px;
             border-radius: 15px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: left;
         }
 
+        .step-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--main-green);
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+        
+        /* 단계 이미지 스타일 (배경 이미지 사용) */
         .step-img {
             width: 100%;
-            height: 150px;
-            background-color: #ddd; /* 사진 들어갈 자리 */
+            height: 180px; 
+            background-color: #ddd; 
             border-radius: 10px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #888;
+            background-size: cover; 
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
+        /* 4-2. 영상 박스 스타일 */
         .video-box {
-            width: 100%;
-            height: 100%;
+            width: 90%;
+            height: 90%;
+            max-width: 1000px;
+            max-height: 560px; /* 16:9 비율 유지 */
+            margin: 0 auto;
             background-color: black;
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 2rem;
+            border-radius: 20px;
+        }
+        
+        .video-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
             border-radius: 20px;
         }
 
@@ -248,7 +295,7 @@
 <body>
 
     <div id="app-container">
-        <header>
+        <header id="app-header">
             <div class="logo-box" onclick="resetApp()">어떻게? 🚮</div>
         </header>
 
@@ -284,18 +331,71 @@
 <script>
     // =========================================================
     // [1. 티처블 머신 모델 URL 설정]
-    // 이 URL이 정확한지 다시 한번 확인해주세요!
     const URL = "https://teachablemachine.withgoogle.com/models/zEph8gOIH/";
     // =========================================================
 
-    let model = null; // 초기값을 null로 명확히 지정
+    // [콘텐츠 매핑] - 감지된 항목에 따른 분리수거 정보 및 이미지/영상 파일명 정의
+    // 이미지 경로는 'static' 폴더를 기준으로 설정했습니다.
+    const RECYCLE_GUIDES = {
+        "MilkisBottle": {
+            category: "플라스틱 (페트)",
+            instruction: [
+                { title: "내용물 비우기", detail: "내용물을 완전히 비우고 물로 깨끗이 헹궈주세요.", img: "static/HowTo_MilkisBottle_1.jpg" },
+                { title: "라벨 제거", detail: "음료수병의 비닐 라벨(뚜껑 포함)은 깔끔하게 떼어냅니다. (일반 쓰레기로 버림)", img: "static/HowTo_MilkisBottle_2.jpg" },
+                { title: "압착 후 뚜껑 닫기", detail: "병의 부피를 줄이기 위해 최대한 찌그러뜨리고, 압축된 상태를 유지하도록 뚜껑을 다시 닫아줍니다.", img: "static/HowTo_MilkisBottle_3.jpg" },
+                { title: "배출", detail: "투명 페트병 수거함에 분리 배출합니다.", img: "static/HowTo_MilkisBottle_4.jpg" }
+            ],
+            // 실제 MilkisBottle 관련 영상의 유튜브 embed URL로 교체 필요
+            video: "https://www.youtube.com/embed/6iQ5QvE7L1Y" 
+        },
+        "PpuPpuBulgogiflavor": {
+            category: "비닐 포장재",
+            instruction: [
+                { title: "내용물 비우기", detail: "과자 부스러기 등 내용물을 최대한 털어냅니다.", img: "static/HowTo_PpuPpu_1.jpg" },
+                { title: "세척/제거", detail: "기름기나 이물질이 있다면 물로 헹구거나 닦아냅니다. (이물질 제거가 어려우면 종량제)", img: "static/HowTo_PpuPpu_2.jpg" },
+                { title: "건조", detail: "물기를 완전히 말려줍니다.", img: "static/HowTo_PpuPpu_3.jpg" },
+                { title: "배출", detail: "깨끗한 비닐류만 따로 모아 비닐류 수거함에 배출합니다.", img: "static/HowTo_PpuPpu_4.jpg" }
+            ],
+            video: "https://www.youtube.com/embed/PpuPpu_ID" // 대체 영상 ID
+        }
+        // 다른 클래스 이름도 여기에 추가 가능
+    };
+    
+    // =========================================================
+
+    let model = null; 
     let maxPredictions;
     let loadingInterval = null; 
-    let isModelLoading = false; // 로딩 상태 플래그 추가
+    let isModelLoading = false; 
 
-    // 1-1. AI 모델 초기화 (앱 시작 시 한번 실행)
+    // [2. DOM 엘리먼트 및 상태 변수]
+    const header = document.getElementById('app-header'); // ID 추가됨
+    const uploadZone = document.getElementById('upload-zone');
+    const fileInput = document.getElementById('file-input');
+    const previewImg = document.getElementById('preview-img');
+    const statusText = document.getElementById('status-text');
+    const btnGroup = document.getElementById('btn-group');
+    const detailView = document.getElementById('detail-view');
+    const resetBar = document.getElementById('reset-bar');
+    const instructionBtn = btnGroup.querySelector('.action-btn:nth-child(1)');
+    const videoBtn = btnGroup.querySelector('.action-btn:nth-child(2)');
+
+
+    let detectedCategory = ""; 
+    let detectedSpecific = ""; 
+    let currentGuide = null; // 현재 감지된 품목의 가이드 객체
+
+    function triggerUpload() { 
+        if (!model || isModelLoading) {
+             alert("AI 모델 로딩 중입니다. 잠시 후 다시 시도해주세요.");
+             return;
+        }
+        fileInput.click(); 
+    }
+
+    // 1-1. AI 모델 초기화
     async function initAI() {
-        if (isModelLoading) return; // 이미 로딩 중이면 중복 실행 방지
+        if (isModelLoading) return; 
         isModelLoading = true;
 
         const modelURL = URL + "model.json";
@@ -308,51 +408,28 @@
         statusTextElement.innerHTML = 'AI 모델을 준비하는 중입니다... 🌐';
         
         try {
-            // TensorFlow와 tmImage 라이브러리 로드 대기
             await tf.ready();
-            
-            // 모델 로드 시작
             model = await tmImage.load(modelURL, metadataURL);
             maxPredictions = model.getTotalClasses();
-            console.log("AI 모델 로딩 완료! 클래스 수:", maxPredictions);
-
-            // 로딩 성공 시 메시지 숨기기
+            
             statusTextElement.style.display = 'none';
-            statusTextElement.style.fontSize = '3rem'; // 원래 크기로 복원
-
+            statusTextElement.style.fontSize = '3rem'; 
         } catch (e) {
-            console.error("모델 로딩 실패 (네트워크 오류, URL 오류, CORS 문제):", e);
-            statusTextElement.innerHTML = '⚠️ AI 모델 로딩 실패. 콘솔을 확인해주세요.';
+            console.error("모델 로딩 실패:", e);
+            statusTextElement.innerHTML = '⚠️ AI 모델 로딩 실패.';
             statusTextElement.style.color = 'red';
-            model = null; // 실패 시 model은 여전히 null
+            model = null; 
         } finally {
              isModelLoading = false;
         }
     }
-    
-    // 페이지 로드 시 AI 준비 시작
+
     window.onload = initAI;
 
-    // [2. DOM 엘리먼트 및 상태 변수] 
-    const uploadZone = document.getElementById('upload-zone');
-    const fileInput = document.getElementById('file-input');
-    const previewImg = document.getElementById('preview-img');
-    const statusText = document.getElementById('status-text');
-    const btnGroup = document.getElementById('btn-group');
-    const detailView = document.getElementById('detail-view');
-    const resetBar = document.getElementById('reset-bar');
-
-    let detectedCategory = ""; 
-    let detectedSpecific = ""; 
-
-    function triggerUpload() { fileInput.click(); }
-
+    // 이미지 선택 처리
     function handleFileSelect(input) {
-        // model이 null이거나 로딩 중이면 경고
         if (!model || isModelLoading) {
-            alert("AI 모델 로딩 중입니다. 잠시 후 다시 시도해주세요. (모델 로딩 상태: " + (model ? "완료" : "실패/대기") + ")");
-            // 로딩이 실패했는데 다시 시도하고 싶다면 initAI()를 다시 호출할 수 있습니다.
-            if (!model && !isModelLoading) initAI(); 
+            alert("AI 모델 로딩 중입니다. 잠시 후 다시 시도해주세요.");
             return;
         }
 
@@ -364,11 +441,11 @@
                 previewImg.style.display = 'block';
                 statusText.style.display = 'block';
                 
-                // 이미지가 로딩된 후에 AI 예측 시작
+                header.classList.add('logo-moved'); // 로고 왼쪽 상단으로 이동 애니메이션 시작
+                
                 previewImg.onload = function() {
                     startDetectionProcess();
                 }
-                // 이미지 로드 실패 시 에러 처리
                 previewImg.onerror = function() {
                     alert("이미지를 로드하는 데 실패했습니다.");
                     resetApp();
@@ -378,10 +455,8 @@
         }
     }
 
-    // 3. AI 감지 로직 (로딩 애니메이션 + 실제 예측)
+    // 3. AI 감지 로직 
     async function startDetectionProcess() {
-        
-        // 3-1. 로딩 애니메이션 시작
         let dots = 0;
         loadingInterval = setInterval(() => {
             dots = (dots % 3) + 1;
@@ -390,18 +465,14 @@
 
         let prediction;
         try {
-            // 3-2. AI 예측 수행 (predict)
             prediction = await model.predict(previewImg);
         } catch (e) {
-            // 예측 중 에러 발생 시 처리
             clearInterval(loadingInterval);
             loadingInterval = null;
             statusText.innerHTML = "❌ 감지 실패: 이미지 오류 또는 모델 예측 문제";
-            console.error("예측 중 오류 발생:", e);
             return;
         }
 
-        // 3-3. 가장 높은 확률의 쓰레기 찾기 및 분석
         let highestProbability = 0;
         let bestClass = "";
 
@@ -412,45 +483,45 @@
             }
         }
 
-        // 로딩 애니메이션 종료
         clearInterval(loadingInterval);
         loadingInterval = null;
 
-        // 클래스 이름 분석 (예: "플라스틱_빈 페트병" -> 학습시킨 'Plastic_MilkisBottle'도 잘 처리됨)
-        // 감지된 확률이 50% 미만이면 '알 수 없음'으로 처리하는 로직을 추가할 수도 있습니다.
         const splitName = bestClass.split('_');
         
+        // 감지된 Specific 항목 설정
         if (splitName.length >= 2) {
-            detectedCategory = splitName[0]; 
             detectedSpecific = splitName[1]; 
         } else {
-            // 언더바가 없을 경우 대비
-            detectedCategory = "일반쓰레기";
             detectedSpecific = bestClass;
         }
         
-        // 3-4. 단계별 결과 표시 시작
+        // 가이드 정보 가져오기
+        currentGuide = RECYCLE_GUIDES[detectedSpecific];
+
+        if (!currentGuide) {
+             // 매핑된 가이드가 없을 경우
+             detectedCategory = "정보 없음";
+             currentGuide = { 
+                category: "일반쓰레기 또는 정보 없음",
+                instruction: [{ title: "정보 없음", detail: "해당 품목의 분리수거 방법을 찾을 수 없습니다. 종량제 봉투를 사용해주세요.", img: "" }], 
+                video: "" 
+             };
+        }
+        detectedCategory = currentGuide.category; // 매핑된 카테고리로 업데이트
+        
         showFirstDetection();
     }
 
-    // 4. 감지 결과 표시 함수들 (이전과 동일)
+    // 4. 감지 결과 표시 함수들 
 
     function showFirstDetection() {
-        // 1차 감지 결과 출력 (카테고리)
         statusText.innerHTML = `아하 !<br>이 쓰레기는 <span class="highlight-text">${detectedCategory}</span>이군요!`;
-        
-        setTimeout(() => {
-            showSecondDetection();
-        }, 2000);
+        setTimeout(() => { showSecondDetection(); }, 2000);
     }
 
     function showSecondDetection() {
-        // 2차 감지 결과 출력 (구체적 이름)
         statusText.innerHTML = `아하 !<br>이 쓰레기는 <span class="highlight-text">${detectedSpecific}</span>이군요!`;
-        
-        setTimeout(() => {
-            showComplete();
-        }, 2000);
+        setTimeout(() => { showComplete(); }, 2000);
     }
 
     function showComplete() {
@@ -458,40 +529,81 @@
         statusText.innerHTML = `감지 완료 ! 🌿`;
         statusText.style.color = "var(--main-green)"; 
         btnGroup.style.display = 'flex';
+        resetBar.style.display = 'flex'; 
+        
+        // 완료 후 자동으로 '분리수거 방법' 표시 및 버튼 활성화
+        // showInstruction() 호출 시 버튼 그룹이 사라지지 않도록 수정됨
+        showInstruction(); 
     }
 
-    // 5. 상세 정보 표시 함수들 (이전과 동일)
+    // 5. 상세 정보 표시 함수들
 
     function showInstruction() {
+        if (!currentGuide) return;
+        
+        // 버튼 활성화 상태 업데이트
+        instructionBtn.classList.add('active');
+        videoBtn.classList.remove('active');
+
         statusText.style.display = 'none'; 
-        btnGroup.style.display = 'none';   
         detailView.style.display = 'flex';
         
-        // detectedSpecific 값에 따른 분리수거 방법 안내
+        const steps = currentGuide.instruction;
+
+        let stepHtml = '';
+        steps.forEach((step, index) => {
+            // 이미지 경로는 static/ 폴더를 사용
+            stepHtml += `
+                <div class="step-box">
+                    <div class="step-img" style="background-image: url('${step.img ? step.img : 'placeholder.png'}');">
+                        ${!step.img ? '사진 준비중' : ''}
+                    </div>
+                    <div class="step-title">${index + 1}. ${step.title}</div>
+                    <div>${step.detail}</div>
+                </div>
+            `;
+        });
+
+        // 2x2 격자 레이아웃을 위한 HTML 구조 생성
         detailView.innerHTML = `
-            <h2 style="color:var(--main-green); margin-bottom:30px;">분리수거 방법 (${detectedSpecific})</h2>
-            <div class="step-container">
-                <div class="step-box"><div class="step-img">내용물 비우기</div><div>내용물을 완전히 비우고 물로 헹굽니다.</div></div>
-                <div class="step-box"><div class="step-img">이물질 제거</div><div>라벨, 뚜껑, 포장재 등은 모두 제거합니다.</div></div>
-                <div class="step-box"><div class="step-img">찌그러뜨리기</div><div>부피를 줄이기 위해 최대한 압착합니다.</div></div>
-                <div class="step-box"><div class="step-img">뚜껑 닫기</div><div>압축된 상태를 유지하도록 뚜껑을 닫거나 묶습니다.</div></div>
+            <h2 style="color:var(--main-green); margin-bottom:20px;">분리수거 방법 (${detectedSpecific})</h2>
+            <div class="grid-container">
+                ${stepHtml}
             </div>
-        `; 
-        resetBar.style.display = 'flex';
+        `;
     }
 
     function showVideo() {
+        if (!currentGuide) return;
+
+        // 버튼 활성화 상태 업데이트
+        instructionBtn.classList.remove('active');
+        videoBtn.classList.add('active');
+
         statusText.style.display = 'none';
-        btnGroup.style.display = 'none';
         detailView.style.display = 'flex';
-        detailView.innerHTML = `<div class="video-box">▶️ ${detectedSpecific} 분리수거 영상 재생 중...</div>`;
-        resetBar.style.display = 'flex';
+
+        if (currentGuide.video) {
+             detailView.innerHTML = `
+                <h2 style="color:var(--main-green); margin-bottom:20px;">분리수거 영상 (${detectedSpecific})</h2>
+                <div class="video-box">
+                    <iframe class="video-iframe" 
+                        src="${currentGuide.video}" 
+                        title="분리수거 가이드 영상"
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            `;
+        } else {
+             detailView.innerHTML = `<h2 style="color:red; margin-bottom:20px;">영상을 찾을 수 없습니다.</h2>`;
+        }
     }
 
-    // 6. 초기화 함수 (이전과 동일)
+    // 6. 초기화 함수 
 
     function resetApp() {
-        // 혹시 실행 중인 로딩 인터벌이 있다면 중지
         if (loadingInterval) {
             clearInterval(loadingInterval);
             loadingInterval = null;
@@ -507,16 +619,15 @@
         resetBar.style.display = 'none';
         statusText.innerHTML = '';
         
+        // 로고 위치 원상 복구
+        header.classList.remove('logo-moved'); 
+        instructionBtn.classList.remove('active');
+        videoBtn.classList.remove('active');
+        
         detectedCategory = "";
         detectedSpecific = "";
+        currentGuide = null;
     }
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
