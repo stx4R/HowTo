@@ -279,14 +279,17 @@
         </div>
     </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 <script>
     // =========================================================
     // [1. 티처블 머신 모델 URL 설정]
-    // 당신의 Teachable Machine 모델 URL로 반드시 변경하세요!
-    const URL = "https://teachablemachine.withgoogle.com/models/zEph8gOIH/"; 
+    // 주소 끝의 슬래시(//)를 하나(/)로 수정했습니다.
+    const URL = "https://teachablemachine.withgoogle.com/models/zEph8gOIH/";
     // =========================================================
 
     let model, maxPredictions;
+    let loadingInterval = null; // 로딩 인터벌 제어를 위한 변수 추가
 
     // 1-1. AI 모델 초기화 (앱 시작 시 한번 실행)
     async function initAI() {
@@ -294,18 +297,26 @@
         const metadataURL = URL + "metadata.json";
 
         try {
+            // AI 라이브러리 로드 확인 (외부 스크립트 태그를 통해 로드)
+            if (typeof tmImage === 'undefined' || typeof tf === 'undefined') {
+                console.error("TensorFlow/Teachable Machine 라이브러리가 로드되지 않았습니다.");
+                alert("⚠️ AI 기능을 사용할 수 없습니다. 인터넷 연결 또는 스크립트 태그를 확인해주세요.");
+                return;
+            }
+            
             model = await tmImage.load(modelURL, metadataURL);
             maxPredictions = model.getTotalClasses();
-            console.log("AI 모델 로딩 완료!");
+            console.log("AI 모델 로딩 완료! 클래스 수:", maxPredictions);
         } catch (e) {
-            console.error("모델 로딩 실패. URL을 확인하거나 CORS 설정 문제일 수 있습니다.", e);
+            console.error("모델 로딩 실패. (네트워크/URL 문제)", e);
+            alert("⚠️ AI 모델 로딩에 실패했습니다. GitHub 배포 설정과 URL을 확인해주세요.");
         }
     }
     
     // 페이지 로드 시 AI 준비 시작
     window.onload = initAI;
 
-    // [2. DOM 엘리먼트 및 상태 변수]
+    // [2. DOM 엘리먼트 및 상태 변수] (이전과 동일)
     const uploadZone = document.getElementById('upload-zone');
     const fileInput = document.getElementById('file-input');
     const previewImg = document.getElementById('preview-img');
@@ -337,6 +348,11 @@
                 previewImg.onload = function() {
                     startDetectionProcess();
                 }
+                // 이미지 로드 실패 시 에러 처리
+                previewImg.onerror = function() {
+                    alert("이미지를 로드하는 데 실패했습니다.");
+                    resetApp();
+                }
             };
             reader.readAsDataURL(input.files[0]);
         }
@@ -347,15 +363,23 @@
         
         // 3-1. 로딩 애니메이션 시작
         let dots = 0;
-        const loadingInterval = setInterval(() => {
+        loadingInterval = setInterval(() => {
             dots = (dots % 3) + 1;
             statusText.innerHTML = `감지중 ${".".repeat(dots)}`;
         }, 300);
 
-        // 3-2. AI 예측 수행 (predict)
-        // 예측이 완료될 때까지 기다립니다.
-        const prediction = await model.predict(previewImg);
-        
+        let prediction;
+        try {
+             // 3-2. AI 예측 수행 (predict)
+             prediction = await model.predict(previewImg);
+        } catch (e) {
+            // 예측 중 에러 발생 시 처리
+            clearInterval(loadingInterval);
+            statusText.innerHTML = "❌ 감지 실패: 이미지 오류 또는 모델 예측 문제";
+            console.error("예측 중 오류 발생:", e);
+            return;
+        }
+
         // 3-3. 가장 높은 확률의 쓰레기 찾기 및 분석
         let highestProbability = 0;
         let bestClass = "";
@@ -371,13 +395,13 @@
         clearInterval(loadingInterval);
 
         // 클래스 이름 분석 (예: "플라스틱_빈 페트병")
+        // 감지된 확률이 50% 미만이면 '알 수 없음'으로 처리하는 로직을 추가할 수도 있습니다.
         const splitName = bestClass.split('_');
         
         if (splitName.length >= 2) {
             detectedCategory = splitName[0]; 
             detectedSpecific = splitName[1]; 
         } else {
-            // 언더바가 없을 경우 대비
             detectedCategory = "일반쓰레기";
             detectedSpecific = bestClass;
         }
@@ -424,12 +448,12 @@
         detailView.innerHTML = `
             <h2 style="color:var(--main-green); margin-bottom:30px;">분리수거 방법 (${detectedSpecific})</h2>
             <div class="step-container">
-                <div class="step-box"><div class="step-img">사진 1</div><div>내용물 비우기</div></div>
-                <div class="step-box"><div class="step-img">사진 2</div><div>이물질 제거</div></div>
-                <div class="step-box"><div class="step-img">사진 3</div><div>찌그러뜨리기</div></div>
-                <div class="step-box"><div class="step-img">사진 4</div><div>뚜껑 닫기</div></div>
+                <div class="step-box"><div class="step-img">내용물 비우기</div><div>내용물을 완전히 비우고 물로 헹굽니다.</div></div>
+                <div class="step-box"><div class="step-img">이물질 제거</div><div>라벨, 뚜껑, 포장재 등은 모두 제거합니다.</div></div>
+                <div class="step-box"><div class="step-img">찌그러뜨리기</div><div>부피를 줄이기 위해 최대한 압착합니다.</div></div>
+                <div class="step-box"><div class="step-img">뚜껑 닫기</div><div>압축된 상태를 유지하도록 뚜껑을 닫거나 묶습니다.</div></div>
             </div>
-        `;
+        `; 
         resetBar.style.display = 'flex';
     }
 
@@ -444,6 +468,12 @@
     // 6. 초기화 함수 (이전과 동일)
 
     function resetApp() {
+        // 혹시 실행 중인 로딩 인터벌이 있다면 중지
+        if (loadingInterval) {
+            clearInterval(loadingInterval);
+            loadingInterval = null;
+        }
+
         uploadZone.style.display = 'flex';
         fileInput.value = ''; 
         previewImg.style.display = 'none';
@@ -460,6 +490,7 @@
 </script>
 </body>
 </html>
+
 
 
 
