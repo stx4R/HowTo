@@ -93,7 +93,7 @@
         }
 
         .logo-img-intro {
-            height: 200px; /* **수정된 값: 인트로 로고 크기 200px** */
+            height: 200px; /* 인트로 로고 크기 200px */
             object-fit: contain;
         }
 
@@ -108,18 +108,9 @@
             white-space: nowrap; 
         }
         
-        /* 버그 수정: 텍스트가 아닌 화살표만 움직이도록 수정 */
-        .intro-arrow {
-            font-size: 2rem;
-            margin-top: 40px;
-            color: var(--toss-text-title); 
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
-            animation: none; 
-        }
+        /* 메인 페이지 화살표 관련 CSS 삭제 */
         
-        @keyframes arrowFloat { 
+        @keyframes arrowFloat { /* 튜토리얼 화살표를 위해 재정의 */
             0%, 100% { transform: translateY(0); opacity: 1; } 
             50% { transform: translateY(15px); opacity: 0.7; } 
         }
@@ -131,15 +122,9 @@
             transform: translateY(0); 
         }
 
-        #intro-area.step-2 .intro-arrow { 
-            opacity: 1; 
-            transform: translateY(0); 
-            animation: arrowFloat 2s ease-in-out infinite; 
-        }
-
-        #intro-area.step-3 .logo-box { transform: translateY(-100px); }
-        #intro-area.step-3 #subtitle { transform: translateY(-100px); }
-        #intro-area.step-3 .intro-arrow { opacity: 0; transform: translateY(-100px); animation: none; }
+        /* 메인 화면 요소 중앙 정렬을 위해 translateY 값 조정 (-100px -> -70px) */
+        #intro-area.step-3 .logo-box { transform: translateY(-70px); }
+        #intro-area.step-3 #subtitle { transform: translateY(-70px); }
         
         #selection-buttons {
             display: flex;
@@ -216,17 +201,28 @@
             transform: translateY(80px); 
         }
 
-        /* [Slide 1: Intro Text] */
+        /* [Slide 1: Intro Text] - 수정됨 */
+        .t-intro-content { /* 텍스트와 화살표를 감싸 중앙 정렬 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
         .t-intro-text {
             font-size: 4rem;
             font-weight: 800;
             text-align: center;
             color: var(--toss-text-title);
-            line-height: 1.3;
-            /* 버그 수정: 텍스트 애니메이션 제거 */
+            line-height: 1; /* 한 줄로 표시되도록 수정 */
             animation: none; 
+            white-space: nowrap; /* 한 줄 강제 */
+            margin-bottom: 10px; /* 화살표와의 작은 간격 */
         }
-
+        .t-intro-arrow { /* 새로 추가된 튜토리얼 화살표 */
+            font-size: 2rem;
+            color: var(--toss-text-title); 
+            opacity: 1;
+            animation: arrowFloat 2s ease-in-out infinite; 
+        }
         /* [Slides 2~6: Layout] */
         .t-content-wrapper {
             display: flex;
@@ -641,8 +637,6 @@
             </div>
             <div id="subtitle">분리수거를 더 쉽게</div>
             
-            <div class="intro-arrow">▼</div>
-
             <div id="selection-buttons">
                 <div class="selection-btn" id="btn-practice">이렇게!</div>
                 <div class="selection-btn" id="btn-start">어떻게?</div>
@@ -652,7 +646,10 @@
         <div id="tutorial-area">
             
             <div class="tutorial-slide active" id="t-slide-1" onclick="nextTutorialStep()">
-                <div class="t-intro-text">분리수거를<br>더 쉽게.</div>
+                <div class="t-intro-content">
+                    <div class="t-intro-text">분리수거를 더 쉽게.</div>
+                    <div class="t-intro-arrow">▼</div>
+                </div>
             </div>
 
             <div class="tutorial-slide" id="t-slide-2" onclick="nextTutorialStep()">
