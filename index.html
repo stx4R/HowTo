@@ -4,7 +4,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="어떻게?">
-    <link rel="apple-touch-icon" href="static/HowTologo.png">
+    <link rel="apple-touch-icon" href="static/HowTologo.png"> 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>어떻게? 🚮</title>
@@ -80,7 +80,7 @@
 
         /* 로고 스타일 */
         .logo-box {
-            font-size: 3rem; /* JS로 교체되므로 텍스트 로고는 더 이상 사용하지 않음 */
+            font-size: 3rem; 
             font-weight: 800;
             color: var(--toss-text-title);
             letter-spacing: -1px;
@@ -93,7 +93,7 @@
         }
 
         .logo-img-intro {
-            height: 100px; /* **수정된 값: 인트로 로고 크기** */
+            height: 200px; /* **수정된 값: 인트로 로고 크기 200px** */
             object-fit: contain;
         }
 
@@ -105,18 +105,18 @@
             opacity: 0;
             transform: translateY(30px);
             transition: all 0.6s ease;
-            white-space: nowrap; /* 버그 수정: 텍스트 한 줄 강제 */
+            white-space: nowrap; 
         }
         
         /* 버그 수정: 텍스트가 아닌 화살표만 움직이도록 수정 */
         .intro-arrow {
             font-size: 2rem;
             margin-top: 40px;
-            color: var(--toss-text-title); /* 검은색 화살표 */
+            color: var(--toss-text-title); 
             opacity: 0;
             transform: translateY(30px);
             transition: opacity 0.6s ease, transform 0.6s ease;
-            animation: none; /* 초기에는 애니메이션 없음 */
+            animation: none; 
         }
         
         @keyframes arrowFloat { 
@@ -134,7 +134,7 @@
         #intro-area.step-2 .intro-arrow { 
             opacity: 1; 
             transform: translateY(0); 
-            animation: arrowFloat 2s ease-in-out infinite; /* 화살표 애니메이션 활성화 */
+            animation: arrowFloat 2s ease-in-out infinite; 
         }
 
         #intro-area.step-3 .logo-box { transform: translateY(-100px); }
@@ -280,7 +280,7 @@
             line-height: 1.8;
             font-weight: 500;
             word-break: keep-all;
-            white-space: pre-wrap; /* 줄바꿈 유지 */
+            white-space: pre-wrap; 
             /* 버그 수정: 정렬을 위한 패딩 추가 (브라우저별 차이 고려) */
             padding-left: 0.5rem; 
         }
@@ -316,7 +316,7 @@
                 font-size: 1.1rem; 
                 text-align: left; 
                 display: inline-block; 
-                padding-left: 0; /* 세로 모드에서는 패딩 제거 */
+                padding-left: 0; 
             }
         }
 
@@ -348,7 +348,7 @@
             align-items: center;
         }
         .logo-img-header {
-            height: 60px; /* **수정된 값: 헤더 로고 크기** */
+            height: 80px; /* **유지된 값: 헤더 로고 크기 80px** */
             object-fit: contain;
         }
 
@@ -369,8 +369,6 @@
             box-sizing: border-box;
         }
         
-        /* (나머지 CSS 스타일은 기존과 동일) */
-
         /* ----------------------- */
         /* A. 업로드 화면 */
         /* ----------------------- */
@@ -804,11 +802,11 @@
     // =========================================================
     // [1. Configuration & Data]
     // =========================================================
-    // 모델 URL 고정 (수정 요청 반영)
+    // 모델 URL 고정 
     const MODEL_URL = "https://teachablemachine.withgoogle.com/models/zEph8gOIH/"; 
-    const DETECTION_THRESHOLD = 0.9; // 감지 정확도 강화 (70% -> 90%)
+    const DETECTION_THRESHOLD = 0.9; 
 
-    // 카테고리 및 데이터 업데이트 (수정 요청 반영)
+    // 카테고리 및 데이터 업데이트 
     const RECYCLE_DATA = {
         "Plastic": {
             title: "플라스틱",
@@ -891,7 +889,7 @@
     let currentStep = 1;
     let model, maxPredictions;
     let detectedClass = "";
-    let isSkippingCleaning = false; // 'O' 선택 시 true
+    let isSkippingCleaning = false; 
 
     // Init Logic
     window.onload = async () => {
@@ -930,7 +928,7 @@
         const prediction = await model.predict(image, false);
         
         let highestProbability = 0;
-        let predictedClass = "Garbage"; // 기본적으로 '일반 쓰레기'로 설정
+        let predictedClass = "Garbage"; 
 
         for (let i = 0; i < maxPredictions; i++) {
             const classPrediction = prediction[i];
@@ -938,25 +936,20 @@
                 highestProbability = classPrediction.probability;
                 
                 // Teachable Machine 라벨을 RECYCLE_DATA 키와 매칭
-                // TM 라벨 예: "0 Plastic" -> "Plastic"
                 const fullLabel = classPrediction.className;
                 const parts = fullLabel.split(' ');
-                // 숫자가 없는 경우(e.g., 'Plastic'), 전체 라벨을 사용
                 const label = parts.length > 1 && !isNaN(parseInt(parts[0])) ? parts[1] : parts[0]; 
 
-                // 데이터셋에 해당 키가 있는지 확인
                 if (RECYCLE_DATA[label]) {
                     predictedClass = label;
                 } else {
-                    // 키가 없으면 Garbage로 강제 분류
                     predictedClass = "Garbage";
                 }
             }
         }
         
-        // 감지 정확도 강화 로직 (수정 요청 반영: 90% 미만 시 에러 처리)
+        // 감지 정확도 강화 로직 (90% 미만 시 에러 처리)
         if (highestProbability < DETECTION_THRESHOLD || predictedClass === "Garbage") { 
-            // Garbage로 분류되거나, 90% 미만일 경우 확실하지 않다고 판단
             return "Error"; 
         }
 
@@ -1009,7 +1002,6 @@
 
     // 파일 업로드 트리거
     function triggerUpload() {
-        // [버그 수정] 요소가 active 상태일 때만 작동하도록
         if(document.getElementById('upload-view').style.display === 'flex') {
             fileInput.click();
         }
@@ -1241,4 +1233,3 @@
 </script>
 </body>
 </html>
-
