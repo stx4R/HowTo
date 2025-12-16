@@ -139,6 +139,150 @@
         .selection-btn#btn-start { background-color: var(--toss-green); color: white; box-shadow: 0 8px 20px rgba(0, 199, 60, 0.3); }
 
         /* ========================================================= */
+        /* [Tutorial Overlay Styling] - 요청하신 화면 전환 디자인 */
+        /* ========================================================= */
+        #tutorial-area {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--toss-white);
+            z-index: 200; /* Intro보다 위에 */
+            display: none; /* 기본 숨김 */
+            overflow: hidden;
+        }
+
+        /* 개별 슬라이드 공통 */
+        .tutorial-slide {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: none; /* JS로 제어 */
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            box-sizing: border-box;
+            /* 애니메이션: 투명도 변화 및 Y축 이동 */
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+            opacity: 0;
+        }
+
+        /* Animation States */
+        .tutorial-slide.active {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 위로 사라질 때 (Exit) */
+        .tutorial-slide.exit {
+            display: flex;
+            opacity: 0;
+            transform: translateY(-80px); /* 위로 이동하며 사라짐 */
+        }
+
+        /* 아래에서 올라올 때 (Enter) */
+        .tutorial-slide.enter {
+            display: flex;
+            opacity: 0;
+            transform: translateY(80px); /* 아래에서 대기 */
+        }
+
+        /* [Slide 1: Intro Text] */
+        .t-intro-text {
+            font-size: 4rem;
+            font-weight: 800;
+            text-align: center;
+            color: var(--toss-text-title);
+            line-height: 1.3;
+            animation: textFloat 3s ease-in-out infinite alternate;
+        }
+        @keyframes textFloat { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+
+        /* [Slides 2~6: Layout] */
+        .t-content-wrapper {
+            display: flex;
+            width: 90%;
+            height: 80%;
+            max-width: 1400px;
+            align-items: center;
+            justify-content: center;
+            gap: 60px;
+        }
+
+        .t-image-box {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f9f9f9; /* 이미지가 돋보이도록 연한 배경 */
+            border-radius: var(--radius-l);
+            padding: 40px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .t-image-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; /* 비율 유지하며 화면에 맞춤 (iPad 최적화) */
+            border-radius: var(--radius-m);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1); /* 이미지 자체 그림자 */
+        }
+
+        .t-text-box {
+            flex: 0.8;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: left;
+        }
+
+        .t-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: var(--toss-text-title);
+            margin-bottom: 30px;
+            word-break: keep-all;
+        }
+
+        .t-desc {
+            font-size: 1.4rem;
+            color: var(--toss-text-body);
+            line-height: 1.8;
+            font-weight: 500;
+            word-break: keep-all;
+            white-space: pre-wrap; /* 줄바꿈 유지 */
+        }
+
+        .t-click-hint {
+            margin-top: 40px;
+            font-size: 1rem;
+            color: var(--toss-green);
+            font-weight: 600;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        /* iPad Portrait / Mobile (세로 모드 대응) */
+        @media (max-width: 1024px) and (orientation: portrait) {
+            .t-content-wrapper {
+                flex-direction: column;
+                gap: 30px;
+            }
+            .t-image-box {
+                flex: 1.2;
+                width: 100%;
+                padding: 20px;
+            }
+            .t-text-box {
+                flex: 0.8;
+                width: 100%;
+                text-align: center;
+            }
+            .t-title { font-size: 2rem; margin-bottom: 15px; }
+            .t-desc { font-size: 1.1rem; text-align: left; display: inline-block; }
+        }
+
+        /* ========================================================= */
         /* [2. Main Layout (New Design)] */
         /* ========================================================= */
 
@@ -461,6 +605,90 @@
             </div>
         </div>
 
+        <div id="tutorial-area" onclick="nextTutorialStep()">
+            
+            <div class="tutorial-slide active" id="t-slide-1">
+                <div class="t-intro-text">분리수거를<br>더 쉽게.</div>
+            </div>
+
+            <div class="tutorial-slide" id="t-slide-2">
+                <div class="t-content-wrapper">
+                    <div class="t-image-box">
+                        <img src="static/likethis1.png" alt="쓰레기 사진 업로드 화면">
+                    </div>
+                    <div class="t-text-box">
+                        <div class="t-title">시작은 사진 한 장으로</div>
+                        <div class="t-desc">
+                            - 쓰레기 사진을 직접 찍거나 앨범에서 선택하여 업로드합니다.<br>
+                            - 복잡한 과정 없이 사진만 올리면 AI가 자동 분석을 시작합니다.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tutorial-slide" id="t-slide-3">
+                <div class="t-content-wrapper">
+                    <div class="t-image-box">
+                        <img src="static/likethis2.png" alt="쓰레기 사진 분석 대기 페이지">
+                    </div>
+                    <div class="t-text-box">
+                        <div class="t-title">AI가 분석을 진행합니다</div>
+                        <div class="t-desc">
+                            - 업로드된 쓰레기의 재질과 종류를 AI가 정밀하게 감지합니다.<br>
+                            - 잠시 기다리시면 정확한 분리수거 정보를 제공받을 수 있습니다.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tutorial-slide" id="t-slide-4">
+                <div class="t-content-wrapper">
+                    <div class="t-image-box">
+                        <img src="static/likethis3.png" alt="잔여물 확인 팝업">
+                    </div>
+                    <div class="t-text-box">
+                        <div class="t-title">사용자 상태에 따른 맞춤 정보</div>
+                        <div class="t-desc">
+                            - 쓰레기에 음식물이나 기타 이물질이 남아있는지 확인하는 팝업이 뜹니다.<br>
+                            - 'O'를 선택하면 세척, 제거 등 준비 과정에 대한 정보가 생략되어 바로 배출 단계로 안내됩니다.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tutorial-slide" id="t-slide-5">
+                <div class="t-content-wrapper">
+                    <div class="t-image-box">
+                        <img src="static/likethis4.png" alt="AI 감지 실패 화면">
+                    </div>
+                    <div class="t-text-box">
+                        <div class="t-title">감지에 실패했을 경우</div>
+                        <div class="t-desc">
+                            - 사진이 너무 흐릿하거나, 쓰레기의 종류가 명확하지 않을 때 발생합니다.<br>
+                            - 화면 하단의 '또다시 ♾️' 버튼을 눌러 처음으로 돌아가 다시 시도할 수 있습니다.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tutorial-slide" id="t-slide-6">
+                <div class="t-content-wrapper">
+                    <div class="t-image-box">
+                        <img src="static/likethis5.png" alt="분리수거 방법 및 영상 제공 화면">
+                    </div>
+                    <div class="t-text-box">
+                        <div class="t-title">올바른 분리배출 방법 확인</div>
+                        <div class="t-desc">
+                            - 감지된 쓰레기의 재질에 맞는 단계별 분리수거 방법과 영상을 제공합니다.<br>
+                            - 모든 과정이 끝나면 하단의 '또다시 ♾️' 버튼을 눌러 처음 화면으로 돌아가서 새로운 쓰레기를 분석할 수 있습니다.
+                        </div>
+                        <div class="t-click-hint">(화면을 터치하면 메인으로 돌아갑니다)</div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
         <header id="app-header">
             <div class="header-logo" onclick="resetApp()">어떻게? 🚮</div>
         </header>
@@ -530,7 +758,6 @@
     // =========================================================
     const MODEL_URL = "https://teachablemachine.withgoogle.com/models/YOUR_NEW_MODEL_URL/"; 
     // ※ 주의: Teachable Machine에서 새로 학습시킨 모델(6개 클래스) URL로 교체해야 합니다.
-    // 현재는 예시 URL을 유지하되, 로직은 요청하신 6개 카테고리에 맞춥니다.
 
     // 카테고리별 데이터 (isCleaning: true인 단계는 'O' 선택시 숨김 처리됨)
     const RECYCLE_DATA = {
@@ -607,6 +834,12 @@
     const loadingMsg = document.getElementById('loading-msg');
     const contentArea = document.getElementById('content-area');
     const tabItems = document.querySelectorAll('.tab-item');
+    
+    // [Tutorial Variables]
+    const tutorialArea = document.getElementById('tutorial-area');
+    const tutorialSlides = document.querySelectorAll('.tutorial-slide');
+    let tutorialStep = 0;
+    let isAnimating = false;
 
     let currentStep = 1;
     let model, maxPredictions;
@@ -620,7 +853,7 @@
     };
 
     // =========================================================
-    // [3. Logic: Intro Animation]
+    // [3. Logic: Intro Animation & Events]
     // =========================================================
     function initIntroEvents() {
         // Step 1 -> 2 -> 3 Logic (기존 유지)
@@ -630,7 +863,7 @@
             if (currentStep === 1) {
                 introArea.classList.add('step-2');
                 currentStep = 2;
-                setTimeout(() => { 
+                setTimeout(() => {  
                     appContainer.addEventListener('click', handleIntroClick, { once: true });
                 }, 100);
             } else if (currentStep === 2) {
@@ -646,10 +879,83 @@
             mainContentArea.style.display = 'flex';
             uploadView.style.display = 'flex';
         });
+
+        // [New Event] "이렇게!" 버튼 클릭 시 튜토리얼 시작
+        document.getElementById('btn-practice').addEventListener('click', () => {
+            introArea.style.display = 'none';
+            startTutorial();
+        });
     }
 
     // =========================================================
-    // [4. Logic: AI & Detection]
+    // [4. Logic: Tutorial Screen]
+    // =========================================================
+    function startTutorial() {
+        tutorialStep = 0;
+        tutorialArea.style.display = 'block';
+        
+        // 초기화: 모든 슬라이드 숨기고 첫 번째만 활성화
+        tutorialSlides.forEach(slide => {
+            slide.classList.remove('active', 'exit', 'enter');
+            slide.style.display = 'none';
+        });
+        
+        // 첫 번째 슬라이드 표시
+        tutorialSlides[0].style.display = 'flex';
+        // 약간의 딜레이 후 active 클래스 추가 (fade effect 위함)
+        setTimeout(() => {
+            tutorialSlides[0].classList.add('active');
+        }, 50);
+    }
+
+    function nextTutorialStep() {
+        if (isAnimating) return; // 애니메이션 중 중복 클릭 방지
+        isAnimating = true;
+
+        const currentSlide = tutorialSlides[tutorialStep];
+        const nextSlide = tutorialSlides[tutorialStep + 1];
+
+        if (!nextSlide) {
+            // 마지막 슬라이드였다면 튜토리얼 종료 후 앱 초기 화면으로 복귀
+            tutorialArea.style.opacity = 0;
+            setTimeout(() => {
+                tutorialArea.style.display = 'none';
+                tutorialArea.style.opacity = 1; // 다음 시작을 위해 초기화
+                resetApp(); // Intro 화면으로 복귀
+            }, 600);
+            isAnimating = false;
+            return;
+        }
+
+        // 1. 현재 슬라이드 퇴장 (위로 사라짐 + 투명도 0)
+        currentSlide.classList.remove('active');
+        currentSlide.classList.add('exit');
+
+        setTimeout(() => {
+            // 퇴장 애니메이션(0.6s) 완료 후 숨김
+            currentSlide.style.display = 'none';
+            currentSlide.classList.remove('exit');
+
+            // 2. 다음 슬라이드 등장 준비 (아래에 위치 + 투명도 0)
+            nextSlide.style.display = 'flex';
+            nextSlide.classList.add('enter');
+
+            // 브라우저 렌더링 타이밍 확보 (Reflow)
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    // 3. 다음 슬라이드 활성화 (원위치 + 투명도 1)
+                    nextSlide.classList.remove('enter');
+                    nextSlide.classList.add('active');
+                    tutorialStep++;
+                    isAnimating = false;
+                });
+            });
+        }, 500); // CSS transition 시간(0.6s)보다 약간 짧게 설정하여 반응성 높임
+    }
+
+
+    // =========================================================
+    // [5. Logic: AI & Detection]
     // =========================================================
     async function loadModel() {
         const modelURL = "https://teachablemachine.withgoogle.com/models/zEph8gOIH/" + "model.json"; // 임시 URL 유지 (실제 사용시 교체)
@@ -722,7 +1028,6 @@
                 showErrorScreen();
             } else {
                 // 클래스 이름 매핑 (Plastic, Can, Paper 등)
-                // 실제 모델 클래스명에 맞게 조정 필요. 여기서는 언더바 제거 등 기본 처리
                 detectedClass = bestClassName.split('_')[0]; // 예: Plastic_bottle -> Plastic
                 
                 // 데이터가 있는지 확인
@@ -730,7 +1035,7 @@
                     showPopup(); // 성공 시 팝업 띄우기
                 } else {
                     // 매칭되는 데이터 없으면 일반 쓰레기 처리 혹은 에러
-                    detectedClass = "Garbage"; 
+                    detectedClass = "Garbage";  
                     showPopup();
                 }
             }
@@ -738,7 +1043,7 @@
     }
 
     // =========================================================
-    // [5. Logic: Popup & Results]
+    // [6. Logic: Popup & Results]
     // =========================================================
     function showPopup() {
         modalOverlay.style.display = 'flex';
@@ -755,8 +1060,7 @@
             modalOverlay.style.display = 'none';
             detectingView.style.display = 'none'; // 감지화면 숨김
             
-            // 로직: O(있음) -> 세척 단계 제거 (Prompt 요청사항: "O 누르면 불필요 정보 삭제")
-            //      X(없음/깨끗) -> 원래대로 출력
+            // 로직: O(있음) -> 세척 단계 제거 
             if (answer === 'O') {
                 isSkippingCleaning = true;
             } else {
@@ -829,13 +1133,14 @@
     }
 
     // =========================================================
-    // [6. Global Reset]
+    // [7. Global Reset]
     // =========================================================
     function resetApp() {
         // 화면 초기화
         mainContentArea.style.display = 'none';
         document.getElementById('app-header').style.display = 'none';
         modalOverlay.style.display = 'none';
+        tutorialArea.style.display = 'none'; // 튜토리얼 화면도 숨김
         
         uploadView.style.display = 'flex';
         detectingView.style.display = 'none';
@@ -852,13 +1157,10 @@
         currentStep = 1;
         
         // Intro 이벤트 다시 연결
-        appContainer.removeEventListener('click', null); // 기존 리스너 정리 (안전장치)
+        // appContainer.removeEventListener('click', null); // 기존 리스너 정리 (안전장치, 필요 시 복구)
         initIntroEvents();
     }
 
 </script>
 </body>
 </html>
-
-
-
