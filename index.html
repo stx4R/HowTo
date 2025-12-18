@@ -15,6 +15,8 @@
             --toss-bg: #F2F4F6;
             --toss-white: #FFFFFF;
             --toss-green: #00C73C; /* Vivid Eco Green */
+            --toss-blue: #3182F6;
+            --toss-blue-pressed: #1B64DA;
             --toss-green-pressed: #00A632;
             --toss-text-title: #191F28; /* Grey 900 */
             --toss-text-body: #333D4B;  /* Grey 800 */
@@ -315,7 +317,26 @@
                 padding-left: 0; 
             }
         }
+        
+            .btn-search { 
+                background-color: var(--toss-blue); 
+                animation-delay: 0.3s; /* 세 번째로 나타나게 설정 */
+            }
+            .btn-search:active { background-color: var(--toss-blue-pressed); transform: scale(0.95); }
+            
+            /* 3. 검색 화면 레이어 스타일 (파일 맨 아래 style 닫기 직전에 추가) */
+            #searchScreen { 
+                display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background-color: #fff; z-index: 1000; padding: 60px 24px;
+                animation: slideUp 0.3s ease-out;
+            }
+            @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+            
+            .search-input-wrapper { background: #F2F4F6; border-radius: 16px; padding: 14px; display: flex; }
+            .search-input { border: none; background: none; outline: none; width: 100%; font-size: 17px; }
+            .result-item { padding: 20px 0; border-bottom: 1px solid #E5E8EB; display: flex; justify-content: space-between; }
 
+        
         /* ========================================================= */
         /* [2. Main Layout (New Design)] */
         /* ========================================================= */
@@ -640,6 +661,7 @@
             <div id="selection-buttons">
                 <div class="selection-btn" id="btn-practice">이렇게!</div>
                 <div class="selection-btn" id="btn-start">어떻게?</div>
+                <div class="selection-btn" id="btn-search">d</div>
             </div>
         </div>
 
@@ -965,6 +987,41 @@ AI가 정밀하게 감지합니다.
     // [4. Logic: UI & Screen Management]
     // =========================================================
 
+// 1. 검색용 데이터 (예시)
+const SEARCH_DB = [
+    { name: "치킨박스", category: "Paper", detail: "기름기는 닦아서 종이로" },
+    { name: "생수병", category: "Plastic", detail: "라벨 제거 후 투명 페트로" }
+];
+
+// 2. 검색창 열기/닫기
+function openSearch() {
+    document.getElementById('searchScreen').style.display = 'block';
+    document.getElementById('searchInput').focus();
+}
+
+function closeSearch() {
+    document.getElementById('searchScreen').style.display = 'none';
+}
+
+// 3. 검색 필터링 로직
+function handleSearch() {
+    const query = document.getElementById('searchInput').value;
+    const resDiv = document.getElementById('searchResults');
+    
+    if (query.length > 0) {
+        const filtered = SEARCH_DB.filter(item => item.name.includes(query));
+        resDiv.innerHTML = filtered.map(item => `
+            <div class="result-item" onclick="showResult('${item.category}'); closeSearch();">
+                <div><b>${item.name}</b><br><small>${item.detail}</small></div>
+                <div>></div>
+            </div>
+        `).join('');
+    } else {
+        resDiv.innerHTML = '';
+    }
+}
+
+    
     function initIntroEvents() {
         // [버그 수정] Intro 클릭 이벤트는 오직 step 1, 2 상태에서만 발생해야 함
         const handleIntroClick = (e) => {
@@ -1234,10 +1291,19 @@ AI가 정밀하게 감지합니다.
         tutorialArea.style.display = 'none';
         resetApp(); 
     }
-
+<div id="searchScreen">
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+        <div class="search-input-wrapper" style="flex: 1;">
+            <input type="text" id="searchInput" class="search-input" placeholder="무엇을 버리시나요?" oninput="handleSearch()">
+        </div>
+        <div onclick="closeSearch()" style="color: var(--toss-blue); cursor: pointer;">취소</div>
+    </div>
+    <div id="searchResults"></div>
+</div>
 </script>
 </body>
 </html>
+
 
 
 
