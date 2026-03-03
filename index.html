@@ -9,20 +9,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>어떻게? 🚮</title>
     <style>
-        /* [Toss-like Design System] */
         :root {
             /* Colors */
             --toss-bg: #F2F4F6;
             --toss-white: #FFFFFF;
-            --toss-green: #00C73C; /* Vivid Eco Green */
+            --toss-green: #00C73C;
             --toss-green-pressed: #00A632;
-            --toss-text-title: #191F28; /* Grey 900 */
-            --toss-text-body: #333D4B;  /* Grey 800 */
-            --toss-text-sub: #8B95A1;   /* Grey 500 */
+            --toss-text-title: #191F28;
+            --toss-text-body: #333D4B;
+            --toss-text-sub: #8B95A1;
             --toss-line: #E5E8EB;
             --toss-btn-bg: #F2F4F6;
-            
-            /* Spacing & Radius */
             --radius-l: 28px;
             --radius-m: 20px;
             --radius-s: 16px;
@@ -36,14 +33,14 @@
             width: 100%;
             height: 100%;
             font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Pretendard', sans-serif;
-            background-color: var(--toss-white); /* Intro는 흰배경 */
+            background-color: var(--toss-white);
             overflow: hidden;
             touch-action: manipulation;
             color: var(--toss-text-title);
             -webkit-font-smoothing: antialiased;
         }
 
-        /* [App Container] */
+        /* App Container */
         #app-container {
             width: 1920px;
             height: 1080px;
@@ -56,13 +53,10 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            /* 클릭 이벤트 버그 수정을 위한 포인터 이벤트 제어 */
             pointer-events: all; 
         }
 
-        /* ========================================================= */
-        /* [1. Intro Area (Original Logic + New Logo Style)] */
-        /* ========================================================= */
+        /*Intro Area*/
         
         #intro-area {
             display: flex;
@@ -78,7 +72,6 @@
             z-index: 100;
         }
 
-        /* 로고 스타일 */
         .logo-box {
             font-size: 3rem; 
             font-weight: 800;
@@ -93,7 +86,7 @@
         }
 
         .logo-img-intro {
-            height: 200px; /* 인트로 로고 크기 200px */
+            height: 200px;
             object-fit: contain;
         }
 
@@ -108,9 +101,7 @@
             white-space: nowrap; 
         }
         
-        /* 메인 페이지 화살표 관련 CSS 삭제 */
-        
-        @keyframes arrowFloat { /* 튜토리얼 화살표를 위해 재정의 */
+        @keyframes arrowFloat {
             0%, 100% { transform: translateY(0); opacity: 1; } 
             50% { transform: translateY(15px); opacity: 0.7; } 
         }
@@ -122,7 +113,6 @@
             transform: translateY(0); 
         }
 
-        /* 메인 화면 요소 중앙 정렬을 위해 translateY 값 조정 (-100px -> -70px) */
         #intro-area.step-3 .logo-box { transform: translateY(-70px); }
         #intro-area.step-3 #subtitle { transform: translateY(-70px); }
         
@@ -154,10 +144,6 @@
 
         .selection-btn:active { transform: scale(0.95); background-color: #E5E8EB; }
         .selection-btn#btn-start { background-color: var(--toss-green); color: white; box-shadow: 0 8px 20px rgba(0, 199, 60, 0.3); }
-
-        /* ========================================================= */
-        /* [Tutorial Overlay Styling] */
-        /* ========================================================= */
         #tutorial-area {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -166,8 +152,6 @@
             display: none; 
             overflow: hidden;
         }
-
-        /* 개별 슬라이드 공통 */
         .tutorial-slide {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -179,30 +163,24 @@
             transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
             opacity: 0;
         }
-
-        /* Animation States */
         .tutorial-slide.active {
             display: flex;
             opacity: 1;
             transform: translateY(0);
         }
-
-        /* 위로 사라질 때 (Exit) */
         .tutorial-slide.exit {
             display: flex;
             opacity: 0;
             transform: translateY(-80px);
         }
-
-        /* 아래에서 올라올 때 (Enter) */
         .tutorial-slide.enter {
             display: flex;
             opacity: 0;
             transform: translateY(80px); 
         }
 
-        /* [Slide 1: Intro Text] - 수정됨 */
-        .t-intro-content { /* 텍스트와 화살표를 감싸 중앙 정렬 */
+        /*Slide 1*/
+        .t-intro-content {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -212,18 +190,18 @@
             font-weight: 800;
             text-align: center;
             color: var(--toss-text-title);
-            line-height: 1; /* 한 줄로 표시되도록 수정 */
+            line-height: 1;
             animation: none; 
-            white-space: nowrap; /* 한 줄 강제 */
-            margin-bottom: 10px; /* 화살표와의 작은 간격 */
+            white-space: nowrap;
+            margin-bottom: 10px;
         }
-        .t-intro-arrow { /* 새로 추가된 튜토리얼 화살표 */
+        .t-intro-arrow {
             font-size: 2rem;
             color: var(--toss-text-title); 
             opacity: 1;
             animation: arrowFloat 2s ease-in-out infinite; 
         }
-        /* [Slides 2~6: Layout] */
+        /*Slides 2~6*/
         .t-content-wrapper {
             display: flex;
             width: 90%;
@@ -277,7 +255,6 @@
             font-weight: 500;
             word-break: keep-all;
             white-space: pre-wrap; 
-            /* 버그 수정: 정렬을 위한 패딩 추가 (브라우저별 차이 고려) */
             padding-left: 0.5rem; 
         }
 
@@ -290,8 +267,6 @@
         }
 
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-
-        /* iPad Portrait / Mobile (세로 모드 대응) */
         @media (max-width: 1024px) and (orientation: portrait) {
             .t-content-wrapper {
                 flex-direction: column;
@@ -316,11 +291,7 @@
             }
         }
 
-        /* ========================================================= */
-        /* [2. Main Layout (New Design)] */
-        /* ========================================================= */
-
-        /* 헤더 */
+        /* Main Layout */
         header#app-header {
             width: 100%;
             height: 80px;
@@ -337,19 +308,17 @@
             backdrop-filter: blur(10px);
         }
         
-        /* 버그 수정: Header 로고를 이미지로 대체 */
         .header-logo {
             cursor: pointer;
             display: flex;
             align-items: center;
         }
         .logo-img-header {
-            height: 80px; /* **유지된 값: 헤더 로고 크기 80px** */
+            height: 80px;
             object-fit: contain;
         }
 
 
-        /* 메인 콘텐츠 영역 (회색 배경) */
         #main-content-area {
             position: absolute;
             top: 0;
@@ -361,13 +330,10 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding-top: 80px; /* Header height */
+            padding-top: 80px;
             box-sizing: border-box;
         }
         
-        /* ----------------------- */
-        /* A. 업로드 화면 */
-        /* ----------------------- */
         .upload-container {
             width: 90%;
             max-width: 600px;
@@ -404,9 +370,7 @@
         
         #file-input { display: none; }
 
-        /* ----------------------- */
-        /* B. 감지중 화면 (Overlay) */
-        /* ----------------------- */
+        /* 감지중 화면 (Overlay) */
         #detecting-view {
             display: none;
             flex-direction: column;
@@ -432,9 +396,7 @@
             color: var(--toss-text-title);
         }
         
-        /* ----------------------- */
-        /* C. 팝업 (Modal) */
-        /* ----------------------- */
+        /* 팝업 */
         #modal-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -493,9 +455,7 @@
         .btn-secondary { background-color: var(--toss-bg); color: var(--toss-text-body); }
         .btn-primary { background-color: var(--toss-green); color: white; }
 
-        /* ----------------------- */
-        /* D. 결과 화면 (Tabs & Content) */
-        /* ----------------------- */
+        /* 결과 화면*/
         #result-view {
             display: none;
             flex-direction: column;
@@ -548,7 +508,6 @@
             align-items: center;
         }
 
-        /* Step List */
         .instruction-card {
             width: 100%;
             max-width: 600px;
@@ -804,14 +763,9 @@ AI가 정밀하게 감지합니다.
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 <script>
-    // =========================================================
-    // [1. Configuration & Data]
-    // =========================================================
-    // 모델 URL 고정 
     const MODEL_URL = "https://teachablemachine.withgoogle.com/models/HPWXwtXOO/"; 
     const DETECTION_THRESHOLD = 0.9; 
 
-    // 카테고리 및 데이터 업데이트 
     const RECYCLE_DATA = {
         "Plastic": {
             title: "플라스틱",
@@ -868,9 +822,6 @@ AI가 정밀하게 감지합니다.
         }
     };
 
-    // =========================================================
-    // [2. Variables & Init]
-    // =========================================================
     const introArea = document.getElementById('intro-area');
     const mainContentArea = document.getElementById('main-content-area');
     const uploadView = document.getElementById('upload-view');
@@ -902,9 +853,6 @@ AI가 정밀하게 감지합니다.
         await loadModel();
     };
 
-    // =========================================================
-    // [3. Logic: Model Loading & Prediction]
-    // =========================================================
     async function loadModel() {
         try {
             const modelURL = MODEL_URL + "model.json";
@@ -915,7 +863,6 @@ AI가 정밀하게 감지합니다.
             console.log("Teachable Machine Model Loaded. Classes:", maxPredictions);
         } catch (error) {
             console.error("Failed to load Teachable Machine model:", error);
-            // 에러 발생 시 UI 업데이트
             const introLogoBox = document.getElementById('intro-logo-box');
             if (introLogoBox) {
                 introLogoBox.innerHTML = '<img src="static/HowTologo.png" alt="어떻게? 로고" class="logo-img-intro"> <span style="color:red; font-size: 1rem;">(모델 로딩 실패)</span>';
@@ -940,7 +887,6 @@ AI가 정밀하게 감지합니다.
             if (classPrediction.probability > highestProbability) {
                 highestProbability = classPrediction.probability;
                 
-                // Teachable Machine 라벨을 RECYCLE_DATA 키와 매칭
                 const fullLabel = classPrediction.className;
                 const parts = fullLabel.split(' ');
                 const label = parts.length > 1 && !isNaN(parseInt(parts[0])) ? parts[1] : parts[0]; 
@@ -953,7 +899,6 @@ AI가 정밀하게 감지합니다.
             }
         }
         
-        // 감지 정확도 강화 로직 (90% 미만 시 에러 처리)
         if (highestProbability < DETECTION_THRESHOLD || predictedClass === "Garbage") { 
             return "Error"; 
         }
@@ -961,19 +906,14 @@ AI가 정밀하게 감지합니다.
         return predictedClass;
     }
 
-    // =========================================================
-    // [4. Logic: UI & Screen Management]
-    // =========================================================
 
     function initIntroEvents() {
-        // [버그 수정] Intro 클릭 이벤트는 오직 step 1, 2 상태에서만 발생해야 함
         const handleIntroClick = (e) => {
             if (e.target.closest('#selection-buttons')) return;
             
             if (currentStep === 1) {
                 introArea.classList.add('step-2');
                 currentStep = 2;
-                // 다시 한 번 클릭 이벤트를 기다림 (화살표/텍스트 애니메이션 후)
                 setTimeout(() => {
                     document.body.addEventListener('click', handleIntroClick, { once: true });
                 }, 100);
@@ -982,11 +922,9 @@ AI가 정밀하게 감지합니다.
                 currentStep = 3;
             }
         };
-        // 초기 클릭 이벤트 등록
         document.body.addEventListener('click', handleIntroClick, { once: true });
 
 
-        // "어떻게?" 버튼 클릭: 메인 앱 시작
         document.getElementById('btn-start').addEventListener('click', () => {
             introArea.style.display = 'none';
             document.getElementById('app-header').style.display = 'flex';
@@ -998,21 +936,18 @@ AI가 정밀하게 감지합니다.
             floatResetBtn.style.display = 'none';
         });
 
-        // "이렇게!" 버튼 클릭: 튜토리얼 시작
         document.getElementById('btn-practice').addEventListener('click', () => {
             introArea.style.display = 'none';
             startTutorial();
         });
     }
 
-    // 파일 업로드 트리거
     function triggerUpload() {
         if(document.getElementById('upload-view').style.display === 'flex') {
             fileInput.click();
         }
     }
 
-    // 파일 선택 핸들러
     async function handleFileSelect(input) {
         if (input.files && input.files[0]) {
             const file = input.files[0];
@@ -1022,7 +957,6 @@ AI가 정밀하게 감지합니다.
                 previewImg.src = e.target.result;
                 showDetectingView();
                 
-                // 예측 시작 (1.5초 후)
                 setTimeout(async () => {
                     const resultClass = await predict();
                     
@@ -1030,7 +964,6 @@ AI가 정밀하게 감지합니다.
                         showErrorView();
                     } else {
                         detectedClass = resultClass;
-                        // 감지 성공 후 잔여물 확인 모달 표시
                         showResidueModal();
                     }
                 }, 1500);
@@ -1039,7 +972,6 @@ AI가 정밀하게 감지합니다.
         }
     }
 
-    // 화면 전환 함수
     function showUploadView() {
         uploadView.style.display = 'flex';
         detectingView.style.display = 'none';
@@ -1085,7 +1017,7 @@ AI가 정밀하게 감지합니다.
         document.querySelector('.modal-card').style.transform = 'translateY(20px)';
         setTimeout(() => {
             modalOverlay.style.display = 'none';
-            isSkippingCleaning = (answer === 'X'); // 'X' (잔여물 없음) 선택 시 준비 단계 스킵
+            isSkippingCleaning = (answer === 'X');
             showResultView();
         }, 300);
     }
@@ -1099,7 +1031,6 @@ AI가 정밀하게 감지합니다.
         document.getElementById('result-category-title').textContent = data.title;
         document.getElementById('result-desc').textContent = `${data.title} 분리수거 방법입니다.`;
         
-        // 초기 탭 (분리수거 방법) 표시
         switchTab('method');
     }
 
@@ -1117,7 +1048,6 @@ AI가 정밀하게 감지합니다.
         if (type === 'method') {
             const data = RECYCLE_DATA[detectedClass] || RECYCLE_DATA["Garbage"];
             data.steps.forEach((step, index) => {
-                // 'X'를 눌렀고, 청소 단계(isCleaning: true)인 경우 스킵
                 if (isSkippingCleaning && step.isCleaning) return; 
 
                 const stepElement = document.createElement('div');
@@ -1150,48 +1080,30 @@ AI가 정밀하게 감지합니다.
     }
 
     function resetApp() {
-        // 모든 뷰 숨기기
         document.getElementById('app-header').style.display = 'none';
         mainContentArea.style.display = 'none';
         tutorialArea.style.display = 'none';
         floatResetBtn.style.display = 'none';
-        
-        // 변수 초기화
         currentStep = 1;
         detectedClass = "";
         isSkippingCleaning = false;
-        
-        // Intro 화면 초기화
         introArea.style.display = 'flex';
         introArea.classList.remove('step-2', 'step-3');
-        
-        // Intro 클릭 이벤트 재등록 (버그 수정)
-        document.body.removeEventListener('click', initIntroEvents); // 이전 이벤트 제거
-        initIntroEvents(); // 새 이벤트 재등록
-        
-        // 로딩 인터벌 정리
+        document.body.removeEventListener('click', initIntroEvents); 
+        initIntroEvents();
         clearInterval(window.loadingInterval);
-        
-        // 업로드 뷰 초기화
         showUploadView();
     }
-
-    // =========================================================
-    // [5. Logic: Tutorial Screen]
-    // =========================================================
+    
     function startTutorial() {
         tutorialStep = 0;
         tutorialArea.style.display = 'block';
-        
-        // 초기화: 모든 슬라이드 숨기고 첫 번째만 활성화
+
         tutorialSlides.forEach(slide => {
             slide.classList.remove('active', 'exit', 'enter');
             slide.style.display = 'none';
-            // [버그 수정] 터치 가능한 영역이 튜토리얼 슬라이드에만 존재하도록 설정
             slide.onclick = nextTutorialStep;
         });
-        
-        // 첫 번째 슬라이드 표시
         tutorialSlides[0].style.display = 'flex';
         setTimeout(() => { tutorialSlides[0].classList.add('active'); }, 10);
     }
@@ -1201,7 +1113,6 @@ AI가 정밀하게 감지합니다.
         isAnimating = true;
 
         if (tutorialStep >= tutorialSlides.length - 1) {
-            // 마지막 슬라이드에서 클릭 시 메인으로 복귀
             endTutorial();
             return;
         }
@@ -1209,16 +1120,10 @@ AI가 정밀하게 감지합니다.
         const currentSlide = tutorialSlides[tutorialStep];
         tutorialStep++;
         const nextSlide = tutorialSlides[tutorialStep];
-
-        // 1. 현재 슬라이드 퇴장 애니메이션
         currentSlide.classList.remove('active');
         currentSlide.classList.add('exit');
-
-        // 2. 다음 슬라이드 등장 준비
         nextSlide.classList.add('enter');
         nextSlide.style.display = 'flex';
-        
-        // 3. 500ms 후 상태 변경 (애니메이션 완료 대기)
         setTimeout(() => {
             currentSlide.style.display = 'none';
             currentSlide.classList.remove('exit');
@@ -1238,6 +1143,7 @@ AI가 정밀하게 감지합니다.
 </script>
 </body>
 </html>
+
 
 
 
